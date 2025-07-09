@@ -1,0 +1,38 @@
+# .github/workflows/main.yml
+# Questo è il file di configurazione per GitHub Actions.
+# Le righe che iniziano con # sono commenti e vengono ignorate.
+# Le righe senza # all'inizio sono istruzioni per GitHub.
+
+name: Test di Analisi ETF # Nome del tuo workflow, visibile su GitHub Actions
+
+on:
+  push:
+    branches: [ main ] # Esegue il workflow ogni volta che fai un push sul branch 'main'
+  pull_request:
+    branches: [ main ] # Esegue il workflow quando apri una pull request verso 'main'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest # Esegui i test su un ambiente Linux pulito fornito da GitHub
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10'] # Esegue i test su più versioni di Python
+
+    steps:
+    - name: Checkout del codice # Step 1: Clona il tuo repository nel runner
+      uses: actions/checkout@v4
+
+    - name: Imposta Python ${{ matrix.python-version }} # Step 2: Configura l'ambiente Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Installa le dipendenze # Step 3: Installa tutte le librerie Python necessarie
+      run: |
+        python -m pip install --upgrade pip
+        # Installa tutte le dipendenze richieste dal tuo script etf_analyzer.py e test_runner.py
+        pip install pandas numpy requests arch gspread google-auth-oauthlib unittest-mock # unittest-mock è per i test
+
+    - name: Esegui i test con unittest # Step 4: Esegue il tuo script di test
+      run: |
+        python test_runner.py
